@@ -1,0 +1,11 @@
+Django-Service-database
+js
+vendor
+img
+.env
+__pycache__/
+*.log
+.env
+.txt
+.json
+.gitignore: db.sqlite3

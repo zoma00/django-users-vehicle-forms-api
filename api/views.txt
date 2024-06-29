@@ -1,0 +1,61 @@
+from rest_framework.views import APIView  # Added import
+#from rest_framework.permissions import IsAuthenticated  # Optional for access control
+#from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.decorators import action
+from rest_framework.status import HTTP_404_NOT_FOUND
+from first_app.models import VehicleType, Client, Vehicle, ServiceVIN, Service
+from .serializers import (
+    VehicleTypeSerializer,
+    ClientSerializer,
+    ServiceVINSerializer,
+    ServiceSerializer,
+    VehicleSerializer
+)
+
+
+#class ReadOnlyPermissons(BasePermission):
+   # def has_permission(self, request, view):
+    #    return request.method in permissions.SAFE_METHODS 
+
+# Create your views here.
+class VehicleTypeViewSet(viewsets.ModelViewSet):
+    queryset = VehicleType.objects.all()
+    serializer_class = VehicleTypeSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly] # Optional for access control
+
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly] # Optional for access control
+
+class VehicleViewSet(viewsets.ModelViewSet):
+    queryset = Vehicle.objects.all()
+    serializer_class = VehicleSerializer
+    permission_classes =[IsAuthenticatedOrReadOnly]
+
+
+class PurchasedClientsView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Optional for access control
+
+    def get(self, request):
+        purchased_clients = Client.objects.order_by("first_name")
+        serializer = ClientSerializer(purchased_clients, many=True)
+        return Response(serializer.data)
+
+
+
+# ... similar viewsets for Vehicle, ServiceVIN, and Service (if needed)
+
+@api_view(['GET'])
+def get_client_api(request, client_id):
+    try:
+        client = Client.objects.get(pk=client_id)
+        serializer = ClientSerializer(client)
+        return Response(serializer.data)
+    except Client.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
